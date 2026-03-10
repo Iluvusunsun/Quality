@@ -1373,3 +1373,87 @@ end
 
 end
 })
+
+local InfiniteJumpEnabled = false
+local UIS = game:GetService("UserInputService")
+
+UIS.JumpRequest:Connect(function()
+
+if InfiniteJumpEnabled then
+
+local char = game.Players.LocalPlayer.Character
+local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+if hum then
+hum:ChangeState(Enum.HumanoidStateType.Jumping)
+end
+
+end
+
+end)
+
+ExploitTab:Toggle({
+Title = "Infinite Jump",
+Default = false,
+Callback = function(v)
+InfiniteJumpEnabled = v
+end
+})
+
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+MiscTab:Button({
+Title = "Server Hop (high player)",
+Callback = function()
+
+local placeId = game.PlaceId
+local servers = HttpService:JSONDecode(game:HttpGet(
+"https://games.roblox.com/v1/games/"..placeId.."/servers/Public?sortOrder=Desc&limit=100"
+))
+
+for _,server in pairs(servers.data) do
+if server.playing >= server.maxPlayers - 2 then
+
+TeleportService:TeleportToPlaceInstance(
+placeId,
+server.id,
+Players.LocalPlayer
+)
+
+break
+end
+end
+
+end
+})
+
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+MiscTab:Button({
+Title = "Server Hop (Low Players)",
+Callback = function()
+
+local placeId = game.PlaceId
+local servers = HttpService:JSONDecode(game:HttpGet(
+"https://games.roblox.com/v1/games/"..placeId.."/servers/Public?sortOrder=Asc&limit=100"
+))
+
+for _,server in pairs(servers.data) do
+if server.playing <= 3 then
+
+TeleportService:TeleportToPlaceInstance(
+placeId,
+server.id,
+Players.LocalPlayer
+)
+
+break
+end
+end
+
+end
+})
