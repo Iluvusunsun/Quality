@@ -98,22 +98,25 @@ local VisualTab   = Window:Tab({Title = "Visual",   Icon = "user"})
 local ExploitTab = Window:Tab({Title = "Exploit", Icon = "map-pin"})
 local MiscTab      = Window:Tab({Title = "Misc",      Icon = "eye"})
 
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- SETTINGS
 AimlockEnabled = false
 FOVEnabled = true
 FOVSize = 120
 AimPart = "Head"
 Smoothness = 0.1
 SafeFriends = false
+WallCheck = false
+FOVMode = "Mouse"
+
 FOVColor = Color3.fromRGB(255,0,0)
 
--- FOV CIRCLE
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = true
 FOVCircle.Thickness = 2
@@ -123,70 +126,122 @@ FOVCircle.Filled = false
 FOVCircle.Color = FOVColor
 
 RunService.RenderStepped:Connect(function()
-    local mousePos = UserInputService:GetMouseLocation()
-    FOVCircle.Position = Vector2.new(mousePos.X, mousePos.Y)
 
+    local pos
+
+    if FOVMode == "Mouse" then
+        local mouse = UserInputService:GetMouseLocation()
+        pos = Vector2.new(mouse.X,mouse.Y)
+    else
+        pos = Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+    end
+
+    FOVCircle.Position = pos
     FOVCircle.Radius = FOVSize
     FOVCircle.Visible = FOVEnabled
     FOVCircle.Color = FOVColor
+
 end)
 
--- GET TARGET
+function IsVisible(part)
+
+    if not WallCheck then
+        return true
+    end
+
+    local origin = Camera.CFrame.Position
+    local direction = (part.Position - origin)
+
+    local params = RaycastParams.new()
+    params.FilterDescendantsInstances = {LocalPlayer.Character}
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+
+    local ray = workspace:Raycast(origin,direction,params)
+
+    if ray and ray.Instance then
+        if ray.Instance:IsDescendantOf(part.Parent) then
+            return true
+        end
+        return false
+    end
+
+    return true
+
+end
+
 function GetClosest()
+
     local closest = nil
     local shortest = FOVSize
 
+    local fovPos
+
+    if FOVMode == "Mouse" then
+        local mouse = UserInputService:GetMouseLocation()
+        fovPos = Vector2.new(mouse.X,mouse.Y)
+    else
+        fovPos = Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+    end
+
     for _,player in pairs(Players:GetPlayers()) do
+
         if player ~= LocalPlayer then
+
             if SafeFriends and player:IsFriendsWith(LocalPlayer.UserId) then
                 continue
             end
 
             local char = player.Character
+
             if char and char:FindFirstChild(AimPart) then
-                local pos, visible = Camera:WorldToViewportPoint(char[AimPart].Position)
-                if visible then
-                    local dist = (Vector2.new(pos.X,pos.Y) - UserInputService:GetMouseLocation()).Magnitude
-                    if dist < shortest then
-                        shortest = dist
-                        closest = char[AimPart]
+
+                local part = char[AimPart]
+
+                if IsVisible(part) then
+
+                    local pos,visible = Camera:WorldToViewportPoint(part.Position)
+
+                    if visible then
+
+                        local dist = (Vector2.new(pos.X,pos.Y) - fovPos).Magnitude
+
+                        if dist < shortest then
+                            shortest = dist
+                            closest = part
+                        end
+
                     end
+
                 end
+
             end
+
         end
+
     end
 
     return closest
+
 end
 
--- AIMLOCK
 RunService.RenderStepped:Connect(function()
+
     if AimlockEnabled then
+
         local target = GetClosest()
+
         if target then
+
             local pos = Camera.CFrame.Position
-            local look = CFrame.new(pos, target.Position)
-            Camera.CFrame = Camera.CFrame:Lerp(look, Smoothness)
+            local look = CFrame.new(pos,target.Position)
+
+            Camera.CFrame = Camera.CFrame:Lerp(look,Smoothness)
+
         end
+
     end
+
 end)
-
--- KEYBINDS
-UserInputService.InputBegan:Connect(function(input,gp)
-    if gp then return end
-
-    if input.KeyCode == Enum.KeyCode.Q then
-        AimlockEnabled = not AimlockEnabled
-    end
-
-    if input.KeyCode == Enum.KeyCode.E then
-        FOVEnabled = not FOVEnabled
-    end
-end)
-
-------------------------------------------------------------------
--- UI (ตามรูปแบบที่คุณให้มา)
-------------------------------------------------------------------
 
 CombatTab:Toggle({
 Title = "Enable Aimlock",
@@ -209,6 +264,14 @@ Title = "Safe Friends",
 Default = false,
 Callback = function(v)
 SafeFriends = v
+end
+})
+
+CombatTab:Toggle({
+Title = "Wall Check",
+Default = false,
+Callback = function(v)
+WallCheck = v
 end
 })
 
@@ -251,6 +314,16 @@ end
 })
 
 CombatTab:Dropdown({
+Title = "FOV Mode",
+Values = {"Mouse","Center"},
+Default = "Mouse",
+Multi = false,
+Callback = function(v)
+FOVMode = v
+end
+})
+
+CombatTab:Dropdown({
 Title = "FOV Color",
 Values = {"Red","Green","White","Blue","Cyan","Purple","RGB"},
 Default = "Red",
@@ -259,26 +332,43 @@ Callback = function(v)
 
 if v == "Red" then
 FOVColor = Color3.fromRGB(255,0,0)
+
 elseif v == "Green" then
 FOVColor = Color3.fromRGB(0,255,0)
+
 elseif v == "White" then
 FOVColor = Color3.fromRGB(255,255,255)
+
 elseif v == "Blue" then
 FOVColor = Color3.fromRGB(0,0,255)
+
 elseif v == "Cyan" then
 FOVColor = Color3.fromRGB(0,255,255)
+
 elseif v == "Purple" then
 FOVColor = Color3.fromRGB(170,0,255)
+
 elseif v == "RGB" then
 
 spawn(function()
-while FOVColor do
+
+while true do
 FOVColor = Color3.fromHSV(tick()%5/5,1,1)
 task.wait()
 end
+
 end)
 
 end
 
+end
+})
+
+MainTab:Keybind({
+Title = "Aimlock Keybind",
+Flag = "aimlock_key",
+Value = "G",
+Callback = function()
+AimlockEnabled = not AimlockEnabled
 end
 })
