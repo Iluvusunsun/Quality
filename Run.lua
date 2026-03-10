@@ -1186,3 +1186,190 @@ end
 
 end
 })
+
+local ChatMessage = ""
+local SpamAmount = 1
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- INPUT MESSAGE
+MiscTab:Input({
+Title = "Chat Message",
+Placeholder = "Enter message to spam...",
+Callback = function(Value)
+ChatMessage = Value
+end
+})
+
+-- INPUT AMOUNT
+MiscTab:Input({
+Title = "Spam Amount",
+Placeholder = "How many messages...",
+Callback = function(Value)
+SpamAmount = tonumber(Value) or 1
+end
+})
+
+-- BUTTON START SPAM
+MiscTab:Button({
+Title = "Start Chat Spam",
+Callback = function()
+
+for i = 1, SpamAmount do
+
+ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(
+ChatMessage,
+"All"
+)
+
+task.wait(0.3)
+
+end
+
+end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local SpectateEnabled = false
+local SelectedPlayer = nil
+
+-- PLAYER LIST
+local PlayerList = {}
+
+for _,p in pairs(Players:GetPlayers()) do
+if p ~= LocalPlayer then
+table.insert(PlayerList,p.Name)
+end
+end
+
+-- DROPDOWN
+MiscTab:Dropdown({
+Title = "Select Player",
+Values = PlayerList,
+Default = nil,
+Multi = false,
+Callback = function(v)
+SelectedPlayer = v
+end
+})
+
+-- SPECTATE TOGGLE
+MiscTab:Toggle({
+Title = "Spectate Player",
+Default = false,
+Callback = function(v)
+
+SpectateEnabled = v
+
+if SpectateEnabled then
+
+local target = Players:FindFirstChild(SelectedPlayer)
+
+if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+Camera.CameraSubject = target.Character.Humanoid
+end
+
+else
+
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+Camera.CameraSubject = LocalPlayer.Character.Humanoid
+end
+
+end
+
+end
+})
+
+local FPSBoostEnabled = false
+
+MiscTab:Toggle({
+Title = "FPS Boost",
+Default = false,
+Callback = function(v)
+
+FPSBoostEnabled = v
+
+if FPSBoostEnabled then
+
+for _,v in pairs(game:GetDescendants()) do
+
+if v:IsA("BasePart") then
+v.Material = Enum.Material.Plastic
+v.Reflectance = 0
+end
+
+if v:IsA("Decal") or v:IsA("Texture") then
+v.Transparency = 1
+end
+
+if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+v.Enabled = false
+end
+
+end
+
+game:GetService("Lighting").GlobalShadows = false
+game:GetService("Lighting").FogEnd = 9e9
+
+else
+
+game:GetService("Lighting").GlobalShadows = true
+
+end
+
+end
+})
+
+local Lighting = game:GetService("Lighting")
+local RTXEnabled = false
+
+MiscTab:Toggle({
+Title = "RTX ON",
+Default = false,
+Callback = function(v)
+
+RTXEnabled = v
+
+if RTXEnabled then
+
+Lighting.Brightness = 3
+Lighting.GlobalShadows = true
+Lighting.EnvironmentDiffuseScale = 1
+Lighting.EnvironmentSpecularScale = 1
+Lighting.Ambient = Color3.fromRGB(70,70,70)
+Lighting.OutdoorAmbient = Color3.fromRGB(120,120,120)
+
+local bloom = Instance.new("BloomEffect")
+bloom.Intensity = 0.4
+bloom.Size = 56
+bloom.Parent = Lighting
+
+local color = Instance.new("ColorCorrectionEffect")
+color.Saturation = 0.2
+color.Contrast = 0.1
+color.Parent = Lighting
+
+local atmosphere = Instance.new("Atmosphere")
+atmosphere.Density = 0.3
+atmosphere.Parent = Lighting
+
+else
+
+for _,v in pairs(Lighting:GetChildren()) do
+if v:IsA("BloomEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("Atmosphere") then
+v:Destroy()
+end
+end
+
+Lighting.Brightness = 1
+
+end
+
+end
+})
