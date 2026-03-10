@@ -9,7 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = "Quality x Hub | All function (เรื้อนเต็มระบบ)​",
+    Title = "Quality x Hub | All function (เรื้อนเต็มระบบ)",
     Icon = "rbxassetid://138614699274576",
     Author = "Quality.Team",
     Folder = "Mybabeee",
