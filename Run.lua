@@ -905,7 +905,7 @@ local hrp = char and char:FindFirstChild("HumanoidRootPart")
 local hum = char and char:FindFirstChildOfClass("Humanoid")
 
 if hrp and hum then
-hrp.Velocity = hum.MoveDirection * (SpeedPower * 50)
+hrp.Velocity = hum.MoveDirection * (SpeedPower * 20)
 end
 
 end
