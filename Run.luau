@@ -96,6 +96,7 @@ end
 local CombatTab   = Window:Tab({Title = "Combat",   Icon = "crosshair"})
 local VisualTab   = Window:Tab({Title = "Visual",   Icon = "user"})
 local ExploitTab = Window:Tab({Title = "Exploit", Icon = "map-pin"})
+local TeleportTab      = Window:Tab({Title = "Teleport",      Icon = "map-pin"})
 local MiscTab      = Window:Tab({Title = "Misc",      Icon = "eye"})
 
 
@@ -1023,5 +1024,165 @@ Flag = "noclip_key",
 Value = "K",
 Callback = function()
 NoclipEnabled = not NoclipEnabled
+end
+})
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local SelectedPlayer = nil
+local SavedName = ""
+local SavedPositions = {}
+local SelectedPosition = nil
+local TweenSpeed = 1.5
+
+-- PLAYER LIST
+local PlayerList = {}
+
+for _,p in pairs(Players:GetPlayers()) do
+if p ~= LocalPlayer then
+table.insert(PlayerList,p.Name)
+end
+end
+
+-- SELECT PLAYER
+TeleportTab:Dropdown({
+Title = "Select Player",
+Values = PlayerList,
+Default = nil,
+Multi = false,
+Callback = function(v)
+SelectedPlayer = v
+end
+})
+
+-- TP TO PLAYER
+TeleportTab:Button({
+Title = "TP To Player",
+Callback = function()
+
+local target = Players:FindFirstChild(SelectedPlayer)
+
+if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+
+LocalPlayer.Character.HumanoidRootPart.CFrame =
+target.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+
+end
+
+end
+})
+
+-- TWEEN TO PLAYER
+TeleportTab:Button({
+Title = "Tween To Player",
+Callback = function()
+
+local target = Players:FindFirstChild(SelectedPlayer)
+
+if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+
+local hrp = LocalPlayer.Character.HumanoidRootPart
+local targetPos = target.Character.HumanoidRootPart.CFrame
+
+local tween = TweenService:Create(
+hrp,
+TweenInfo.new(TweenSpeed),
+{CFrame = targetPos}
+)
+
+tween:Play()
+
+end
+
+end
+})
+
+-- TWEEN SPEED
+TeleportTab:Slider({
+Title = "Tween Speed",
+Flag = "tween_speed",
+Step = 0.1,
+Value = {
+Min = 0.1,
+Max = 5,
+Default = 1.5
+},
+Callback = function(v)
+TweenSpeed = v
+end
+})
+
+-- INPUT POSITION NAME
+TeleportTab:Input({
+Title = "Position Name",
+Placeholder = "Enter location name",
+Callback = function(Value)
+SavedName = Value
+end
+})
+
+-- SAVE POSITION
+TeleportTab:Button({
+Title = "Save Position",
+Callback = function()
+
+if SavedName ~= "" then
+
+local hrp = LocalPlayer.Character.HumanoidRootPart
+SavedPositions[SavedName] = hrp.CFrame
+
+end
+
+end
+})
+
+-- SAVED POSITION LIST
+TeleportTab:Dropdown({
+Title = "Saved Positions",
+Values = {},
+Default = nil,
+Multi = false,
+Callback = function(v)
+SelectedPosition = v
+end
+})
+
+-- TP TO SAVED
+TeleportTab:Button({
+Title = "TP To Saved",
+Callback = function()
+
+if SelectedPosition and SavedPositions[SelectedPosition] then
+
+LocalPlayer.Character.HumanoidRootPart.CFrame =
+SavedPositions[SelectedPosition]
+
+end
+
+end
+})
+
+-- TWEEN TO SAVED
+TeleportTab:Button({
+Title = "Tween To Saved",
+Callback = function()
+
+if SelectedPosition and SavedPositions[SelectedPosition] then
+
+local hrp = LocalPlayer.Character.HumanoidRootPart
+
+local tween = TweenService:Create(
+hrp,
+TweenInfo.new(TweenSpeed),
+{CFrame = SavedPositions[SelectedPosition]}
+)
+
+tween:Play()
+
+end
+
 end
 })
