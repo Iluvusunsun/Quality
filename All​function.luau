@@ -1107,7 +1107,7 @@ Flag = "tween_speed",
 Step = 0.1,
 Value = {
 Min = 0.1,
-Max = 5,
+Max = 500,
 Default = 1.5
 },
 Callback = function(v)
