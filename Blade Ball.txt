@@ -19,7 +19,7 @@ local player = LocalPlayer
 
 -- GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "A&B Hub GUI"
+ScreenGui.Name = "RICK Hub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
@@ -88,14 +88,14 @@ end)
 setfflag("TaskSchedulerTargetFps", "5099990")
 
 local Players = game:GetService("Players")
-local targetName = "A&B Hub Admin"
-local labelText = "A&B Hub Admin - Hot AF"
+local targetName = "Rick Hub Admin"
+local labelText = "Rick Hub Admin - Hot AF"
 
 local function createESP(head)
 	if head:FindFirstChild("A&B_HUB_MANAGER_ESP") then return end
 
 	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "A&B_HUB_MANAGER_ESP"
+	billboard.Name = "RICK_HUB_MANAGER_ESP"
 	billboard.AlwaysOnTop = true
 	billboard.Size = UDim2.new(0, 100, 0, 30)
 	billboard.Adornee = head
@@ -135,14 +135,14 @@ end
 Players.PlayerAdded:Connect(applyOnPlayer)
 
 local Players = game:GetService("Players")
-local targetName = "A&B Hub Owner"
-local labelText = "A&B Hub Owner"
+local targetName = "RICK Hub Owner"
+local labelText = "RICK Hub Owner"
 
 local function createESP(head)
 	if head:FindFirstChild("A&B_HUB_OWNER_ESP") then return end
 
 	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "A&B_HUB_OWNER_ESP"
+	billboard.Name = "RICK_HUB_OWNER_ESP"
 	billboard.AlwaysOnTop = true
 	billboard.Size = UDim2.new(0, 100, 0, 30)
 	billboard.Adornee = head
@@ -229,7 +229,7 @@ local pl = main:create_tab('Player', 'rbxassetid://126017907477623')
 local visuals = main:create_tab('Visuals', 'rbxassetid://10723346959')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
 local devuwu = main:create_tab('Exclusive', 'rbxassetid://10734966248')
--- A&B Hub UI Patch
+-- RICK Hub UI Patch
 task.spawn(function()
     local ORANGE = Color3.fromRGB(255, 165, 0)
 
